@@ -9,6 +9,7 @@
   "author": "Kharoh",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^6.0.1"
+    "better-sqlite3": "^6.0.1",
+    "lodash": "^4.17.15"
   }
 }
