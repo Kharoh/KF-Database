@@ -143,9 +143,3 @@ class Base extends Map {
     }
 
 }
-
-const game = new Base({ name: 'game' })
-
-game.deleteAll()
-
-console.log(game)
