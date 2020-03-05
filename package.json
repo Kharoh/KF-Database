@@ -1,0 +1,15 @@
+{
+  "name": "kf-database",
+  "version": "1.0.0",
+  "description": "simple database sqlite driven for kf games",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kharoh",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^6.0.1",
+    "enmap": "^5.2.4"
+  }
+}
