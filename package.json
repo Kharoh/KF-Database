@@ -1,15 +1,34 @@
 {
   "name": "kf-database",
   "version": "1.0.0",
-  "description": "simple database sqlite driven for kf games",
+  "description": "A simple database sqlite driven for kf games and more.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kharoh/KF-Database.git"
+  },
+  "keywords": [
+    "database",
+    "sqlite",
+    "simple",
+    "kf-database"
+  ],
   "author": "Kharoh",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kharoh/KF-Database/issues"
+  },
+  "homepage": "https://github.com/Kharoh/KF-Database#readme",
   "dependencies": {
     "better-sqlite3": "^6.0.1",
     "lodash": "^4.17.15"
-  }
+  },
+  "files": [
+    "package.json",
+    "README.md",
+    "index.js"
+  ]
 }
