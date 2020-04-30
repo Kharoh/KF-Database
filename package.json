@@ -1,8 +1,9 @@
 {
   "name": "kf-database",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A simple database sqlite driven for kf games and more.",
   "main": "index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "ts-node ./src/index.ts",
     "build": "tsc"
@@ -28,8 +29,7 @@
     "lodash": "^4.17.15"
   },
   "files": [
-    "package.json",
-    "README.md",
+    "lib/**/*",
     "index.js"
   ],
   "devDependencies": {
