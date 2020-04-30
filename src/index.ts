@@ -110,7 +110,8 @@ class Base extends Map {
     /* If the path is not null or undefined, set the new value at the given key and the given path */
     if (path !== null && path !== undefined) {
       if (data === null || data === undefined)
-        _.set(data, path, value)
+        data = {}
+      _.set(data, path, value)
     }
 
     /* Otherwise set the new value at the given key */
