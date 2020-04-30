@@ -1,7 +1,7 @@
 {
   "name": "kf-database",
   "version": "1.1.0",
-  "description": "A simple database sqlite driven for kf games and more.",
+  "description": "A very simple sqlite driven database",
   "main": "index.js",
   "types": "lib/index.d.ts",
   "scripts": {
