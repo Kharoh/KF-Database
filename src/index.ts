@@ -12,7 +12,7 @@ class Base {
   /**
    * The map object storing database in memory
    */
-  private map?: Map<any, any>
+  public map?: Map<any, any>
 
   /**
    * Create a new sqlite database, accessible through simple methods
@@ -25,13 +25,23 @@ class Base {
     /**
      * The options of the database
      */
-    public readonly options: BaseOptions
+    public readonly options?: BaseOptions
   ) {
     if (!fs.existsSync('./data')) fs.mkdirSync('./data')
     this.database = new Database(`data${sep}base.sqlite`)
 
+    /* Retrieve the table or create it */
+    const table = this.database.prepare("SELECT count(*) FROM sqlite_master WHERE type='table' AND name = ?;").get(this.name)
+    if (!table['count(*)']) {
+      this.database.prepare(`CREATE TABLE ${this.name} (key text PRIMARY KEY, value text)`).run()
+      this.database.pragma('synchronous = 1')
+      this.database.pragma('journal_mode = wal')
+    }
+    this.database.prepare(`CREATE TABLE IF NOT EXISTS 'internal::changes::${this.name}' (type TEXT, key TEXT, value TEXT, timestamp INTEGER, pid INTEGER);`).run()
+    this.database.prepare('CREATE TABLE IF NOT EXISTS \'internal::autonum\' (enmap TEXT PRIMARY KEY, lastnum INTEGER)').run()
+
     /* If the database is not specified to not be in memory, we store it in memory */
-    if (options.hasMapInMemory !== false)
+    if (options?.inMemory !== false)
       this.fetchEverything()
   }
 
@@ -59,7 +69,7 @@ class Base {
   private getValueObjectAtKey(key: string): any {
     return this.map ?
       this.map.get(key) :
-      this.database.prepare(`SELECT * FROM ${this.name} WHERE key = ${key}`).all()?.[0]?.value
+      JSON.parse(this.database.prepare(`SELECT * FROM ${this.name} WHERE key = ?;`).get(key)?.value)
   }
 
   /**
@@ -118,10 +128,90 @@ class Base {
       valueObject = value
 
     /* Save the changes in the database */
-    this.database.prepare(`INSERT OR REPLACE INTO ${this.name} (key, value) VALUES (${key}, ${JSON.stringify(valueObject)});`).run()
+    this.database.prepare(`INSERT OR REPLACE INTO ${this.name} (key, value) VALUES (?, ?);`).run(key, JSON.stringify(valueObject))
 
     /* If there is a map in memory, set the new value */
     this.map?.set(key, valueObject)
+  }
+
+  /**
+   * Ensure that a value exists in the database while getting it
+   * @param key - The key of the value we want to get in the database
+   * @param defaultValue - The default value that we will get if there is no value defined
+   * @param path - The path we need to follow if the value at the key is an object
+   */
+  public ensure(key: string | number, defaultValue: any, path?: string | number) {
+    /* Throw an error if there was no default value provided */
+    if (defaultValue === null || defaultValue === undefined)
+      throw new Error(`No default value provided on ensure method for "${key}" in "${this.name}"`)
+
+    /* Return the value at the given key and the given path if there is one */
+    const possibleValue = this.get(key, path)
+    if (possibleValue)
+      return possibleValue
+
+    /* If there is not value at the given and given path, set the new value as the default value and set it in the database */
+    if (path !== null && path !== undefined) {
+      this.set(key, defaultValue, path)
+      return defaultValue
+    }
+
+    /* If there is not path, set the data at the given key */
+    this.set(key, defaultValue)
+    return defaultValue
+  }
+
+  /**
+   * Delete a value at a given key following a given path in the database
+   * @param key - The key of the value to delete in the database
+   * @param path - The path we need to follow to delete the value at the end of it
+   * @returns Whether or not something was deleted
+   */
+  public delete(key: string | number, path?: string | number): boolean {
+    /* Declare the default return value */
+    let hasDeletedSomething = false
+
+    /* Retrieve the data at the given key */
+    const data = this.get(key)
+
+    /* If there is a path, delete the value following the path */
+    if (path !== null && path !== undefined) {
+      hasDeletedSomething = _.unset(data, path)
+      this.set(key, data)
+      return hasDeletedSomething
+    }
+
+    /* If there is no path, delete the value at the given key */
+    if (data) hasDeletedSomething = true
+    this.map?.delete(key)
+    this.database.prepare(`DELETE FROM ${this.name} WHERE key = ?;`).run(key)
+    return hasDeletedSomething
+  }
+
+  /**
+   * Delete all the values from all the keys of the database
+   */
+  public deleteAll(): void {
+    /* Delete all the values */
+    this.database.prepare(`DELETE FROM ${this.name};`).run()
+
+    /* Clear the Map */
+    this.map?.clear()
+  }
+
+  /**
+   * Get all the keys of the database
+   * @returns The keys of the database in an array
+   */
+  get indices(): string[] {
+    /* If there is a map, return the keys of the map */
+    if (this.map) return [...this.map.keys()]
+
+    /* Retrieve all the rows in the database */
+    const rows: any[] = this.database.prepare(`SELECT key FROM '${this.name}';`).all()
+
+    /* Return all the keys */
+    return rows.map(row => row.key)
   }
 }
 
@@ -129,7 +219,7 @@ export interface BaseOptions {
   /**
    * Whether or not the database is stored in memory using a Map
    */
-  hasMapInMemory: boolean
+  inMemory?: boolean
 }
 
 export default Base
