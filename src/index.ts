@@ -67,9 +67,13 @@ class Base {
    * @param key - The key of the value object to get
    */
   private getValueObjectAtKey(key: string): any {
-    return this.map ?
-      this.map.get(key) :
-      JSON.parse(this.database.prepare(`SELECT * FROM ${this.name} WHERE key = ?;`).get(key)?.value)
+    /* If database is in memory, return the memory value */
+    if (this.map) return this.map.get(key)
+
+    /* Otherwise retrieve the value in the database */
+    const possibleValue = this.database.prepare(`SELECT * FROM ${this.name} WHERE key = ?;`).get(key)?.value
+    if (possibleValue !== undefined) return JSON.parse(possibleValue)
+    return possibleValue
   }
 
   /**
