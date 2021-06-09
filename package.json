@@ -1,6 +1,6 @@
 {
   "name": "kf-database",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "A very simple sqlite driven database",
   "main": "index.js",
   "types": "lib/index.d.ts",
