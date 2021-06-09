@@ -175,6 +175,10 @@ class Base {
     /* Declare the default return value */
     let hasDeletedSomething = false
 
+    /* If the key is a number we convert it to a string */
+    if (typeof key === 'number')
+      key = key.toString()
+
     /* Retrieve the data at the given key */
     const data = this.get(key)
 
