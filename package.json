@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/Kharoh/KF-Database#readme",
   "dependencies": {
-    "better-sqlite3": "^6.0.1",
+    "better-sqlite3": "^8.3.0",
     "lodash": "^4.17.21"
   },
   "files": [
